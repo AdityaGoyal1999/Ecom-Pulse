@@ -14,7 +14,7 @@ export function Hero() {
         </p>
         <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
           <Link
-            href="#"
+            href="/signup"
             className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Get started

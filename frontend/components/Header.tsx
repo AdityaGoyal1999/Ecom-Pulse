@@ -5,7 +5,7 @@ const navLinks = [
   { href: "#", label: "Features" },
   { href: "#", label: "Pricing" },
   { href: "#", label: "Contact" },
-  { href: "#", label: "Sign up" },
+  { href: "/signup", label: "Sign up" },
 ];
 
 export function Header() {
