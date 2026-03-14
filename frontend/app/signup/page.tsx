@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 
@@ -39,17 +40,78 @@ function GoogleIcon({ className }: { className?: string }) {
 }
 
 function AuthForm() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const isLogin = searchParams.get("mode") === "login";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async () => {
+    setError(null);
+    if (!email.trim()) {
+      setError("Please enter your email.");
+      return;
+    }
+    if (!password) {
+      setError("Please enter your password.");
+      return;
+    }
+    if (!isLogin && password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    if (!isLogin && password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
+    setLoading(true);
+    const supabase = createClient();
+
+    try {
+      if (isLogin) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
+        if (signInError) {
+          setError(signInError.message);
+          return;
+        }
+        router.push("/dashboard");
+        router.refresh();
+      } else {
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+        });
+        if (signUpError) {
+          setError(signUpError.message);
+          return;
+        }
+        // Supabase may require email confirmation; redirect to dashboard or show message
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
       <h1 className="font-sans text-2xl font-bold tracking-tight text-foreground">
         {isLogin ? "Log in to Ecom Pulse" : "Sign up for Ecom Pulse"}
       </h1>
+
+      {error && (
+        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          {error}
+        </p>
+      )}
 
       <div className="space-y-3">
         <input
@@ -84,8 +146,10 @@ function AuthForm() {
         <Button
           type="button"
           className="h-10 w-full rounded-md bg-foreground text-background hover:bg-foreground/90"
+          onClick={handleSubmit}
+          disabled={loading}
         >
-          {isLogin ? "Log in" : "Sign up"}
+          {loading ? "Please wait…" : isLogin ? "Log in" : "Sign up"}
         </Button>
       </div>
 
