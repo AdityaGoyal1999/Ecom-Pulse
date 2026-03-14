@@ -47,7 +47,7 @@ const features: {
 
 export function Features() {
   return (
-    <section className="border-t border-border bg-background py-16 md:py-24">
+    <section id="features" className="border-t border-border bg-background py-16 md:py-24">
       <div className="container px-4">
         <h2 className="font-sans text-center text-2xl font-bold tracking-tight text-foreground sm:text-3xl md:text-4xl">
           Built for outcomes, not just data
