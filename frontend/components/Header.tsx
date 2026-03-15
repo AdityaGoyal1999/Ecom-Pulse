@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const navLinks = [
   { href: "#", label: "About us" },
@@ -14,8 +15,15 @@ export function Header() {
       <div className="container flex h-14 items-center justify-between px-4">
         <Link
           href="/"
-          className="font-semibold text-foreground transition-colors hover:text-primary"
+          className="flex items-center gap-2 font-semibold text-foreground transition-colors hover:text-primary"
         >
+          <Image
+            src="/logo/vector/default-monochrome-black.svg"
+            alt="What to read AI?"
+            width={28}
+            height={28}
+            className="size-7 shrink-0 object-contain"
+          />
           What to read AI?
         </Link>
         <nav className="flex items-center gap-6">
