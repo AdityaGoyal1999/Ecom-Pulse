@@ -73,10 +73,10 @@ export function Footer() {
               href="/"
               className="font-semibold text-foreground transition-colors hover:text-primary"
             >
-              Ecom Pulse
+              What to read AI?
             </Link>
             <p className="mt-3 max-w-xs text-sm text-muted-foreground">
-              Detect failures before they hurt your business.
+              Personalized book recommendations in no time.
             </p>
             <ul className="mt-4 flex gap-4">
               {socialLinks.map(({ href, icon: Icon, label }) => (
@@ -99,7 +99,7 @@ export function Footer() {
         </div>
         <div className="mt-12 border-t border-border pt-8">
           <p className="text-center text-sm text-muted-foreground">
-            © {year} Ecom Pulse. All rights reserved.
+            © {year} What to read AI?. All rights reserved.
           </p>
         </div>
       </div>

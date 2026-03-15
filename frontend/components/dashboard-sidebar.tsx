@@ -51,10 +51,10 @@ export function DashboardSidebar({ children }: { children: React.ReactNode }) {
             <SidebarMenuItem>
               <SidebarMenuButton
                   render={<Link href="/dashboard">
-                    <Image src="/next.svg" alt="Ecom Pulse" width={24} height={24} />
-                    <span>Ecom Pulse</span>
+                    <Image src="/next.svg" alt="What to read AI?" width={24} height={24} />
+                    <span>What to read AI?</span>
                   </Link>}
-                tooltip="Ecom Pulse"
+                tooltip="What to read AI?"
               />
             </SidebarMenuItem>
           </SidebarMenu>
