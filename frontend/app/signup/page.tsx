@@ -158,6 +158,7 @@ function AuthForm() {
           type="button"
           variant="outline"
           className="h-10 w-full rounded-md border-border bg-background gap-2"
+          disabled={true}
         >
           <GoogleIcon />
           {isLogin ? "Log in with Google" : "Continue with Google"}
