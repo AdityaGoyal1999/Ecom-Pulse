@@ -5,34 +5,34 @@ import { ChevronDown } from "lucide-react";
 
 const faqs: { question: string; answer: string }[] = [
   {
-    question: "How much does it really cost?",
+    question: "How does the shelf snap work?",
     answer:
-      "Free tier is $0 forever—no credit card required. Pro is $29/month with a 14-day free trial. Enterprise pricing is custom based on your store count and needs. No hidden fees or long-term contracts.",
+      "You take or upload a photo of a bookstore shelf. We identify the books in the image and combine that with your Goodreads profile and preferences to suggest which titles from that display you're most likely to enjoy.",
   },
   {
-    question: "Does it work with my store?",
+    question: "Do I need a Goodreads account?",
     answer:
-      "Ecom Pulse works with Shopify, WooCommerce, BigCommerce, and other platforms that expose order or checkout data. Setup usually takes under 10 minutes: add your store URL and connect alerts. We’ll guide you step by step.",
+      "Yes. Connecting Goodreads lets us tailor recommendations to your reading history and ratings. You can also set preferences in the app (genres, mood, length), but picks are more accurate with Goodreads linked.",
   },
   {
-    question: "Is my data secure?",
+    question: "Is my Goodreads data secure?",
     answer:
-      "Yes. We use encryption in transit and at rest, don’t store payment details, and only access the data needed to run checks (e.g. uptime, order counts). We’re SOC 2 compliant and happy to sign DPAs for Enterprise customers.",
+      "Yes. We use your Goodreads data only to power your recommendations. We do not share it with third parties, and we use encryption in transit and at rest. We only access what is needed to personalize your picks.",
   },
   {
-    question: "What if I need help?",
+    question: "Can I use it without being in a store?",
     answer:
-      "Free and Pro users get email support and in-app docs. Enterprise includes a dedicated success manager and priority support. We aim to reply within 24 hours for standard plans.",
+      "The main use case is in-store: snap a shelf and get picks. You can also use photos of shelves from elsewhere (e.g. a friend's photo or an online image) to get personalized recommendations from that set of books.",
   },
   {
-    question: "Can I cancel anytime?",
+    question: "What if I don't see my favorite genres?",
     answer:
-      "Yes. You can downgrade or cancel from your account settings. No lock-in—we’ll keep your data available for 30 days after cancellation so you can export if needed.",
+      "You can set and update your preferences—genres, mood, length—in the app. Those are used together with Goodreads to filter and rank suggestions so you see picks that match your taste.",
   },
   {
-    question: "How do alerts work?",
+    question: "How much does it cost?",
     answer:
-      "You choose how to be notified: email, Slack, or (on Enterprise) PagerDuty or webhooks. You set the rules—e.g. “alert if checkout is down for 2 minutes” or “alert if orders drop 50% vs. yesterday.”",
+      "We're focused on making discovery better for readers. Pricing details will be shared when we launch—there will be a free tier to get started, with optional upgrades for power users.",
   },
 ];
 
@@ -46,7 +46,7 @@ export function FAQ() {
           Frequently asked questions
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
-          Quick answers to common questions about pricing, setup, and support.
+          Quick answers about how it works, Goodreads, and your data.
         </p>
 
         <div className="mx-auto mt-12 max-w-2xl space-y-2">
