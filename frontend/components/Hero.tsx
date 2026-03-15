@@ -5,12 +5,11 @@ export function Hero() {
     <section className="relative flex min-h-[calc(100vh-3.5rem)] flex-col items-center justify-center px-6 pt-14 text-center">
       <div className="mx-auto max-w-3xl space-y-6">
         <h1 className="font-sans text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl">
-          Detect failures before they hurt your business
+          Personalized book recommendations in no time
         </h1>
         <p className="text-lg text-muted-foreground sm:text-xl">
-          Ecom Pulse gives store owners the tools to spot issues fast—downtime,
-          broken checkouts, and missed orders—so you can fix them before
-          customers notice.
+          Ever visited a bookstore and struggled to find which book you might read?
+          Searching through summaries of all the books is cumbersome and not possible.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
           <Link

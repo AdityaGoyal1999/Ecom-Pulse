@@ -16,7 +16,7 @@ export function Header() {
           href="/"
           className="font-semibold text-foreground transition-colors hover:text-primary"
         >
-          Ecom Pulse
+          What to read AI?
         </Link>
         <nav className="flex items-center gap-6">
           {navLinks.map(({ href, label }) => (
