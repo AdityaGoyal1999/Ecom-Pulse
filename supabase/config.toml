@@ -411,4 +411,5 @@ entrypoint = "./functions/get-favorites/index.ts"
 [functions.image-processing]
 enabled = true
 verify_jwt = false
+import_map = "./functions/image-processing/deno.json"
 entrypoint = "./functions/image-processing/index.ts"
