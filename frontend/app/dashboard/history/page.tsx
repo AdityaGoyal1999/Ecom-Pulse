@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { ChevronRight } from "lucide-react";
 
 type ScanItem = {
   id: number;
@@ -91,10 +92,11 @@ export default function HistoryPage() {
                 onClick={() => {}}
                 className="w-full rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-muted/40 sm:p-5"
               >
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-start justify-between gap-3">
                   <p className="text-sm font-medium text-foreground">
                     {new Date(scan.created_at).toLocaleString()}
                   </p>
+                  <ChevronRight className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">Status: {scan.status}</p>
               </button>
