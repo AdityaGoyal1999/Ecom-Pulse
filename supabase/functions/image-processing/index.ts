@@ -73,6 +73,10 @@ function normalizeRecommendations(raw: unknown): Recommendation[] {
     .slice(0, 5);
 }
 
+function normalizeTitleForMatch(title: string): string {
+  return title.trim().toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ");
+}
+
 async function fetchOpenAiJson({
   apiKey,
   model,
@@ -234,6 +238,10 @@ async function generateRecommendations({
 }): Promise<Recommendation[]> {
   if (detectedBooks.length === 0) return [];
 
+  const detectedByNormalizedTitle = new Map(
+    detectedBooks.map((book) => [normalizeTitleForMatch(book.title), book])
+  );
+
   const parsed = await fetchOpenAiJson({
     apiKey: openAiApiKey,
     model: "gpt-4.1-mini",
@@ -247,9 +255,10 @@ async function generateRecommendations({
               "You are a book recommendation engine. " +
               "Given detected books from a shelf, the user's favorite books, and preferred genres, " +
               "recommend up to 5 books this user is most likely to love. " +
+              "IMPORTANT: You MUST choose only from the detected books list and never suggest any book outside it. " +
               "Return STRICT JSON only in this schema: " +
               '{"books":[{"title":"string","author":"string|null","reason":"string"}]}. ' +
-              "Maximum 5 books.\n\n" +
+              "If no books are detected, return an empty array. Out of the detected books, return up to 5 recommendations.\n\n" +
               `Detected books: ${JSON.stringify(detectedBooks)}\n` +
               `Favorite books: ${JSON.stringify(favoriteBooks)}\n` +
               `Preferred genres: ${JSON.stringify(genres)}`,
@@ -259,7 +268,25 @@ async function generateRecommendations({
     ],
   });
 
-  return normalizeRecommendations(parsed?.books);
+  const normalized = normalizeRecommendations(parsed?.books);
+
+  // Enforce that recommendations are strictly from detected books.
+  const strictDetectedOnly = normalized
+    .map((rec) => {
+      const detected = detectedByNormalizedTitle.get(
+        normalizeTitleForMatch(rec.title)
+      );
+      if (!detected) return null;
+      return {
+        title: detected.title,
+        author: detected.author,
+        reason: rec.reason,
+      };
+    })
+    .filter((rec): rec is Recommendation => rec !== null)
+    .slice(0, 5);
+
+  return strictDetectedOnly;
 }
 
 Deno.serve(async (req) => {
