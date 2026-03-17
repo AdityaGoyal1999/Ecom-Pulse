@@ -41,7 +41,36 @@ Deno.serve(async (req) => {
     );
   }
 
-  // TODO: read body (e.g. genres array) and persist to DB for user.id
+  const body = (await req.json().catch(() => null)) as { genres?: unknown } | null;
+  const genres = Array.isArray(body?.genres)
+    ? body.genres.filter((g): g is string => typeof g === "string")
+    : [];
+
+  const preferencesData = { genres };
+
+  const supabaseAdmin = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  );
+
+  const { error: updateError } = await supabaseAdmin
+    .from("profiles")
+    .update({
+      preferences_data: preferencesData,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id);
+
+  if (updateError) {
+    console.error("save-genre-preferences update error", updateError);
+    return new Response(
+      JSON.stringify({ error: "Failed to save preferences" }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      }
+    );
+  }
 
   return new Response(
     JSON.stringify({ message: "Preferences saved" }),
