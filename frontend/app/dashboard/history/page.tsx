@@ -20,6 +20,17 @@ type ScanItem = {
   recommendations: ScanBook[];
 };
 
+function getStatusStyles(status: string): string {
+  const normalized = status.toLowerCase();
+  if (normalized === "completed") {
+    return "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300";
+  }
+  if (normalized === "failed") {
+    return "border-destructive/40 bg-destructive/10 text-destructive";
+  }
+  return "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300";
+}
+
 export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -160,7 +171,16 @@ export default function HistoryPage() {
                     </p>
                     <ChevronRight className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                   </div>
-                  <p className="mt-1 text-xs text-muted-foreground">Status: {scan.status}</p>
+                  <div className="mt-2">
+                    <span
+                      className={cn(
+                        "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide",
+                        getStatusStyles(scan.status)
+                      )}
+                    >
+                      {scan.status}
+                    </span>
+                  </div>
                 </button>
               ))}
             </div>
@@ -178,7 +198,15 @@ export default function HistoryPage() {
                       {new Date(selectedScan.created_at).toLocaleString()}
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Status: <span className="font-medium text-foreground">{selectedScan.status}</span>
+                      Status:{" "}
+                      <span
+                        className={cn(
+                          "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide",
+                          getStatusStyles(selectedScan.status)
+                        )}
+                      >
+                        {selectedScan.status}
+                      </span>
                     </p>
                   </div>
 

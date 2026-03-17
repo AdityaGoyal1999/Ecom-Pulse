@@ -23,11 +23,17 @@ import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Home, LogOut, ImagePlus, Heart, Sliders, History } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import { cn } from "@/lib/utils";
 
 export function DashboardSidebar({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
+  const [profileDetails, setProfileDetails] = useState<{
+    createdAt: string | null;
+    isPro: boolean | null;
+  }>({ createdAt: null, isPro: null });
+  const [profilePopupOpen, setProfilePopupOpen] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -38,6 +44,18 @@ export function DashboardSidebar({ children }: { children: React.ReactNode }) {
       ]);
 
       setUser(u ?? null);
+      if (!u?.id) return;
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("created_at, is_pro")
+        .eq("id", u.id)
+        .single();
+
+      setProfileDetails({
+        createdAt: profile?.created_at ?? null,
+        isPro: typeof profile?.is_pro === "boolean" ? profile.is_pro : null,
+      });
 
     })();
   }, []);
@@ -118,10 +136,14 @@ export function DashboardSidebar({ children }: { children: React.ReactNode }) {
           </SidebarGroup>
         </SidebarContent>
         <SidebarFooter>
-          <div className="flex w-full items-center justify-between gap-2 overflow-hidden rounded-md p-2 group-data-[collapsible=icon]:justify-center">
-            <Link
-              href="/dashboard/profile"
-              className="flex min-w-0 flex-1 items-center gap-2 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:justify-center"
+          <div className="relative flex w-full items-center justify-between gap-2 overflow-visible rounded-md p-2 group-data-[collapsible=icon]:justify-center">
+            <button
+              type="button"
+              onClick={() => setProfilePopupOpen((prev) => !prev)}
+              className={cn(
+                "flex min-w-0 flex-1 items-center gap-2 rounded-md text-left hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                "group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:justify-center"
+              )}
               title={displayName}
             >
               <Avatar className="size-8 shrink-0">
@@ -136,7 +158,7 @@ export function DashboardSidebar({ children }: { children: React.ReactNode }) {
                 </p>
                 <p className="truncate text-xs text-sidebar-foreground/80">{email}</p>
               </div>
-            </Link>
+            </button>
             <Button
               variant="ghost"
               size="icon"
@@ -146,6 +168,46 @@ export function DashboardSidebar({ children }: { children: React.ReactNode }) {
             >
               <LogOut className="size-4" />
             </Button>
+
+            {profilePopupOpen && (
+              <div className="absolute inset-x-2 bottom-full z-50 mb-2 rounded-lg border border-sidebar-border bg-sidebar p-3 shadow-lg group-data-[collapsible=icon]:inset-x-auto group-data-[collapsible=icon]:left-full group-data-[collapsible=icon]:ml-2 group-data-[collapsible=icon]:w-64">
+                <div className="flex items-center gap-3">
+                  <Avatar className="size-10 shrink-0">
+                    <AvatarImage src={user?.user_metadata?.avatar_url} alt={displayName} />
+                    <AvatarFallback className="text-xs">
+                      {displayName.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-sidebar-foreground">{displayName}</p>
+                    <p className="truncate text-xs text-sidebar-foreground/80">{email || "No email"}</p>
+                  </div>
+                </div>
+
+                <div className="mt-3 space-y-1 text-xs text-sidebar-foreground/90">
+                  <p>
+                    Joined:{" "}
+                    <span className="font-medium">
+                      {profileDetails.createdAt
+                        ? new Date(profileDetails.createdAt).toLocaleDateString()
+                        : "Unknown"}
+                    </span>
+                  </p>
+                  <p>
+                    Pro status:{" "}
+                    <span
+                      className={cn(
+                        "font-medium",
+                        profileDetails.isPro === true && "text-emerald-600 dark:text-emerald-400",
+                        profileDetails.isPro === false && "text-sidebar-foreground/80"
+                      )}
+                    >
+                      {profileDetails.isPro === null ? "Unknown" : profileDetails.isPro ? "Pro" : "Free"}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </SidebarFooter>
       </Sidebar>
