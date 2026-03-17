@@ -413,3 +413,9 @@ enabled = true
 verify_jwt = false
 import_map = "./functions/image-processing/deno.json"
 entrypoint = "./functions/image-processing/index.ts"
+
+[functions.save-genre-preferences]
+enabled = true
+verify_jwt = false
+import_map = "./functions/save-genre-preferences/deno.json"
+entrypoint = "./functions/save-genre-preferences/index.ts"
