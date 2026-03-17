@@ -10,7 +10,7 @@ const corsHeaders = {
 };
 
 type Book = { title: string; author: string | null };
-type Recommendation = { title: string; author: string | null; reason?: string };
+type Recommendation = { title: string; author: string | null; reason: string };
 
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -64,9 +64,12 @@ function normalizeRecommendations(raw: unknown): Recommendation[] {
     .map((book: any) => ({
       title: typeof book?.title === "string" ? book.title.trim() : "",
       author: typeof book?.author === "string" ? book.author.trim() : null,
-      reason: typeof book?.reason === "string" ? book.reason.trim() : undefined,
+      reason:
+        typeof book?.reason === "string" && book.reason.trim().length > 0
+          ? book.reason.trim()
+          : "This recommendation aligns with your favorites, preferences, and detected shelf books.",
     }))
-    .filter((book) => book.title.length > 0)
+    .filter((book) => book.title.length > 0 && book.reason.length > 0)
     .slice(0, 5);
 }
 
@@ -334,7 +337,8 @@ Deno.serve(async (req) => {
 
     return jsonResponse(
       {
-        message: "file uploaded",
+        message: "Recommendations generated",
+        recommended_books: recommendations,
         scan: inserted,
       },
       200
