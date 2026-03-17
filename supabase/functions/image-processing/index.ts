@@ -315,7 +315,6 @@ Deno.serve(async (req) => {
 
     const bucketId = payload?.bucket_id?.trim();
     const objectPath = payload?.object_path?.trim();
-    const status = payload?.status?.trim() || "pending";
 
     if (!bucketId || !objectPath) {
       return jsonResponse(
@@ -359,7 +358,7 @@ Deno.serve(async (req) => {
         user_id: user.id,
         bucket_id: bucketId,
         object_path: objectPath,
-        status,
+        status: "completed",
         detected_books: detectedBooks,
         recommendations,
       })
@@ -394,7 +393,7 @@ Deno.serve(async (req) => {
       return jsonResponse(
         {
           error:
-            "Unsupported image format for processing. Please upload JPEG, PNG, or HEIC (auto-converted to JPEG).",
+            "Unsupported image format for processing. Please upload JPEG, JPG, PNG, or HEIC (auto-converted to JPEG).",
         },
         415
       );
