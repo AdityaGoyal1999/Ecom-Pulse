@@ -19,8 +19,6 @@ type ScanItem = {
   recommendations: ScanBook[] | null;
 };
 
-const HISTORY_API_ENDPOINT = "/api/history/scans";
-
 export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,29 +31,15 @@ export default function HistoryPage() {
 
       try {
         const supabase = createClient();
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
+        const { data, error } = await supabase.functions.invoke("get-previous-scans");
 
-        const res = await fetch(HISTORY_API_ENDPOINT, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session?.access_token ?? ""}`,
-          },
-        });
-
-        const data = (await res.json().catch(() => ({}))) as
-          | { scans?: unknown }
-          | ScanItem[];
-
-        if (!res.ok) {
-          setError("Failed to load history.");
+        if (error) {
+          setError(error.message || "Failed to load history.");
           return;
         }
 
-        const rawScans = Array.isArray(data) ? data : Array.isArray(data.scans) ? data.scans : [];
-        const parsed = rawScans.filter((scan): scan is ScanItem => {
+        const rawScans = Array.isArray(data?.scans) ? data.scans : [];
+        const parsed = rawScans.filter((scan: unknown): scan is ScanItem => {
           const s = scan as Partial<ScanItem>;
           return (
             typeof s.id === "number" &&
