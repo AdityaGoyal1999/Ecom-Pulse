@@ -3,17 +3,30 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+type ScanBook = {
+  title: string;
+  author: string | null;
+  reason: string | null;
+};
 
 type ScanItem = {
   id: number;
   created_at: string;
   status: string;
+  image_url: string | null;
+  detected_books: ScanBook[];
+  recommendations: ScanBook[];
 };
 
 export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [scans, setScans] = useState<ScanItem[]>([]);
+  const [selectedScanId, setSelectedScanId] = useState<number | null>(null);
+
+  const selectedScan = scans.find((scan) => scan.id === selectedScanId) ?? null;
 
   useEffect(() => {
     const loadHistory = async () => {
@@ -30,16 +43,59 @@ export default function HistoryPage() {
         }
 
         const rawScans = Array.isArray(data?.scans) ? data.scans : [];
-        const parsed = rawScans.filter((scan: unknown): scan is ScanItem => {
-          const s = scan as Partial<ScanItem>;
-          return (
-            typeof s.id === "number" &&
-            typeof s.created_at === "string" &&
-            typeof s.status === "string"
-          );
-        });
+        const parsed = rawScans
+          .map((scan: unknown) => {
+            const s = scan as {
+              id?: unknown;
+              created_at?: unknown;
+              status?: unknown;
+              image_url?: unknown;
+              detected_books?: unknown;
+              recommendations?: unknown;
+            };
+
+            if (
+              typeof s.id !== "number" ||
+              typeof s.created_at !== "string" ||
+              typeof s.status !== "string"
+            ) {
+              return null;
+            }
+
+            const toBooks = (input: unknown): ScanBook[] =>
+              Array.isArray(input)
+                ? input
+                    .map((book: unknown) => {
+                      const b = book as {
+                        title?: unknown;
+                        author?: unknown;
+                        reason?: unknown;
+                      };
+                      if (typeof b.title !== "string" || b.title.trim().length === 0) {
+                        return null;
+                      }
+                      return {
+                        title: b.title.trim(),
+                        author: typeof b.author === "string" ? b.author.trim() : null,
+                        reason: typeof b.reason === "string" ? b.reason.trim() : null,
+                      };
+                    })
+                    .filter((book): book is ScanBook => book !== null)
+                : [];
+
+            return {
+              id: s.id,
+              created_at: s.created_at,
+              status: s.status,
+              image_url: typeof s.image_url === "string" ? s.image_url : null,
+              detected_books: toBooks(s.detected_books),
+              recommendations: toBooks(s.recommendations),
+            } as ScanItem;
+          })
+          .filter((scan: ScanItem | null): scan is ScanItem => scan !== null);
 
         setScans(parsed);
+        setSelectedScanId((prev) => prev ?? parsed[0]?.id ?? null);
       } catch {
         setError("Something went wrong while loading history.");
       } finally {
@@ -84,23 +140,92 @@ export default function HistoryPage() {
         )}
 
         {!loading && !error && scans.length > 0 && (
-          <div className="space-y-4">
-            {scans.map((scan) => (
-              <button
-                key={scan.id}
-                type="button"
-                onClick={() => {}}
-                className="w-full rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-muted/40 sm:p-5"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <p className="text-sm font-medium text-foreground">
-                    {new Date(scan.created_at).toLocaleString()}
-                  </p>
-                  <ChevronRight className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,320px)_1fr]">
+            <div className="space-y-3">
+              {scans.map((scan) => (
+                <button
+                  key={scan.id}
+                  type="button"
+                  onClick={() => setSelectedScanId(scan.id)}
+                  className={cn(
+                    "w-full rounded-xl border bg-card p-4 text-left transition-colors hover:bg-muted/40",
+                    selectedScanId === scan.id
+                      ? "border-primary ring-2 ring-primary/20"
+                      : "border-border"
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-sm font-medium text-foreground">
+                      {new Date(scan.created_at).toLocaleString()}
+                    </p>
+                    <ChevronRight className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">Status: {scan.status}</p>
+                </button>
+              ))}
+            </div>
+
+            <div className="rounded-xl border border-border bg-card p-4 sm:p-5">
+              {!selectedScan ? (
+                <p className="text-sm text-muted-foreground">
+                  Select a scan from the list to view its details.
+                </p>
+              ) : (
+                <div className="space-y-5">
+                  <div>
+                    <h2 className="text-lg font-semibold text-foreground">Scan details</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {new Date(selectedScan.created_at).toLocaleString()}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Status: <span className="font-medium text-foreground">{selectedScan.status}</span>
+                    </p>
+                  </div>
+
+                  <div className="overflow-hidden rounded-lg border border-border bg-muted/20">
+                    {selectedScan.image_url ? (
+                      <img
+                        src={selectedScan.image_url}
+                        alt="Scan capture"
+                        className="h-auto max-h-[340px] w-full object-contain"
+                      />
+                    ) : (
+                      <div className="flex min-h-[180px] items-center justify-center px-4 py-8 text-sm text-muted-foreground">
+                        Scan image is not available for this item.
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid gap-4">
+                    <section className="space-y-2">
+                      <h3 className="text-sm font-semibold text-foreground">Recommendations</h3>
+                      {selectedScan.recommendations.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">No recommendations available.</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {selectedScan.recommendations.map((book, idx) => (
+                            <div
+                              key={`${selectedScan.id}-recommendation-${book.title}-${idx}`}
+                              className="rounded-md border border-border/80 bg-background px-3 py-2"
+                            >
+                              <p className="text-sm text-foreground">
+                                {book.title}
+                                {book.author ? (
+                                  <span className="text-muted-foreground"> by {book.author}</span>
+                                ) : null}
+                              </p>
+                              {book.reason ? (
+                                <p className="mt-1 text-xs text-muted-foreground">{book.reason}</p>
+                              ) : null}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </section>
+                  </div>
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">Status: {scan.status}</p>
-              </button>
-            ))}
+              )}
+            </div>
           </div>
         )}
       </div>
