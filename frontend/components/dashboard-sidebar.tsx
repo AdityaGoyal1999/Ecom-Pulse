@@ -16,11 +16,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
+  SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Home, LogOut, ImagePlus, Heart, Sliders, History, Gauge } from "lucide-react";
+import { LayoutDashboard, Home, LogOut, ImagePlus, Heart, Sliders, History, Gauge, CreditCard } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { cn } from "@/lib/utils";
@@ -87,22 +88,9 @@ export function DashboardSidebar({ children }: { children: React.ReactNode }) {
           </SidebarMenu>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupContent>
+          <SidebarGroup className="flex flex-1 flex-col min-h-0">
+            <SidebarGroupContent className="flex flex-1 flex-col min-h-0">
               <SidebarMenu>
-                {/* <SidebarMenuItem>
-                  <SidebarMenuButton
-                    render={<Link href="/"><Home />Home</Link>}
-                    tooltip="Home"
-                  />
-                </SidebarMenuItem> */}
-                {/* <SidebarMenuItem>
-                  <SidebarMenuButton
-                    render={<Link href="/dashboard"><LayoutDashboard />Dashboard</Link>}
-                    isActive={pathname === "/dashboard"}
-                    tooltip="Dashboard"
-                  />
-                </SidebarMenuItem> */}
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     render={<Link href="/dashboard/new-image"><ImagePlus />New Image</Link>}
@@ -124,6 +112,11 @@ export function DashboardSidebar({ children }: { children: React.ReactNode }) {
                     tooltip="Genre preferences"
                   />
                 </SidebarMenuItem>
+              </SidebarMenu>
+
+              <div className="min-h-0 flex-1" aria-hidden />
+
+              <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     render={<Link href="/dashboard/history"><History />History</Link>}
@@ -136,6 +129,13 @@ export function DashboardSidebar({ children }: { children: React.ReactNode }) {
                     render={<Link href="/dashboard/usage"><Gauge />Usage</Link>}
                     isActive={pathname === "/dashboard/usage"}
                     tooltip="Usage"
+                  />
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    render={<Link href="/dashboard/billing"><CreditCard />Billing</Link>}
+                    isActive={pathname === "/dashboard/billing"}
+                    tooltip="Billing"
                   />
                 </SidebarMenuItem>
               </SidebarMenu>
