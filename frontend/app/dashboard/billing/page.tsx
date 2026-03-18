@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { CreditCard, Receipt } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 function getMonthWindow(date: Date) {
   const start = new Date(date);
@@ -26,6 +27,18 @@ export default function BillingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isPro, setIsPro] = useState<boolean | null>(null);
+  const [paymentsLoading, setPaymentsLoading] = useState(false);
+
+  async function handlePayments() {
+    setPaymentsLoading(true);
+    try {
+      const supabase = createClient();
+      const { data, error: fnError } = await supabase.functions.invoke("create-stripe-checkout");
+      console.log("create-stripe-checkout response:", { data, error: fnError });
+    } finally {
+      setPaymentsLoading(false);
+    }
+  }
 
   const { start, end } = useMemo(() => getMonthWindow(new Date()), []);
 
@@ -101,10 +114,20 @@ export default function BillingPage() {
           <>
             {/* Section 1: Current status */}
             <section className="space-y-3">
-              <h2 className="flex items-center gap-2 font-sans text-lg font-semibold text-foreground">
-                <CreditCard className="h-5 w-5" />
-                Current plan
-              </h2>
+              <div className="flex items-center justify-between">
+                <h2 className="flex items-center gap-2 font-sans text-lg font-semibold text-foreground">
+                  <CreditCard className="h-5 w-5" />
+                  Current plan
+                </h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePayments}
+                  disabled={paymentsLoading}
+                >
+                  {paymentsLoading ? "Loading..." : "Payments"}
+                </Button>
+              </div>
               <div className="rounded-xl border border-border bg-card p-5">
                 {isPro ? (
                   <div className="space-y-4">
