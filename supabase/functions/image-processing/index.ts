@@ -152,6 +152,33 @@ function isUnsupportedImageFormatError(message: string): boolean {
   );
 }
 
+async function incrementUserNumScans(
+  supabaseAdmin: ReturnType<typeof createClient>,
+  userId: string
+) {
+  const { data: profile, error: profileError } = await supabaseAdmin
+    .from("profiles")
+    .select("num_scans")
+    .eq("id", userId)
+    .single();
+
+  if (profileError) {
+    throw profileError;
+  }
+
+  const current = typeof profile?.num_scans === "number" ? profile.num_scans : 0;
+  const next = current + 1;
+
+  const { error: updateError } = await supabaseAdmin
+    .from("profiles")
+    .update({ num_scans: next })
+    .eq("id", userId);
+
+  if (updateError) {
+    throw updateError;
+  }
+}
+
 async function insertScanRow({
   supabaseAdmin,
   userId,
@@ -389,6 +416,12 @@ Deno.serve(async (req) => {
         recommendations: [],
       });
 
+      try {
+        await incrementUserNumScans(supabaseAdmin, user.id);
+      } catch (err) {
+        console.error("image-processing num_scans increment failed", err);
+      }
+
       return jsonResponse(
         {
           message:
@@ -421,6 +454,12 @@ Deno.serve(async (req) => {
       detectedBooks,
       recommendations,
     });
+
+    try {
+      await incrementUserNumScans(supabaseAdmin, user.id);
+    } catch (err) {
+      console.error("image-processing num_scans increment failed", err);
+    }
 
     console.log("image-processing created scan:", inserted);
 
