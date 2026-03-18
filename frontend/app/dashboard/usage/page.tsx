@@ -4,11 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
-type ScanItem = {
-  id: number;
-  created_at: string;
-};
-
 function getMonthWindow(date: Date) {
   const start = new Date(date);
   start.setDate(1);
@@ -27,7 +22,7 @@ export default function UsagePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isPro, setIsPro] = useState<boolean | null>(null);
-  const [scans, setScans] = useState<ScanItem[]>([]);
+  const [numScans, setNumScans] = useState<number>(0);
 
   const { start, end } = useMemo(() => getMonthWindow(new Date()), []);
 
@@ -45,11 +40,11 @@ export default function UsagePage() {
           return;
         }
 
-        const [{ data: profileData, error: profileError }, { data: historyData, error: historyError }] =
-          await Promise.all([
-            supabase.from("profiles").select("is_pro").eq("id", user.id).single(),
-            supabase.functions.invoke("get-previous-scans"),
-          ]);
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("is_pro, num_scans")
+          .eq("id", user.id)
+          .single();
 
         if (profileError) {
           setError(profileError.message || "Failed to load profile.");
@@ -57,22 +52,7 @@ export default function UsagePage() {
         }
 
         setIsPro(typeof profileData?.is_pro === "boolean" ? profileData.is_pro : false);
-
-        if (historyError) {
-          setError(historyError.message || "Failed to load usage.");
-          return;
-        }
-
-        const rawScans = Array.isArray(historyData?.scans) ? historyData.scans : [];
-        const parsed = rawScans
-          .map((scan: unknown) => {
-            const s = scan as { id?: unknown; created_at?: unknown };
-            if (typeof s.id !== "number" || typeof s.created_at !== "string") return null;
-            return { id: s.id, created_at: s.created_at } as ScanItem;
-          })
-          .filter((scan: ScanItem | null): scan is ScanItem => scan !== null);
-
-        setScans(parsed);
+        setNumScans(typeof profileData?.num_scans === "number" ? profileData.num_scans : 0);
       } catch {
         setError("Something went wrong while loading usage.");
       } finally {
@@ -83,18 +63,9 @@ export default function UsagePage() {
     void loadUsage();
   }, []);
 
-  const scansThisMonth = useMemo(() => {
-    const startMs = start.getTime();
-    const endMs = end.getTime();
-    return scans.filter((s) => {
-      const t = Date.parse(s.created_at);
-      return Number.isFinite(t) && t >= startMs && t < endMs;
-    }).length;
-  }, [end, scans, start]);
-
   const limit = isPro ? 50 : 5;
-  const remaining = Math.max(0, limit - scansThisMonth);
-  const percent = limit > 0 ? Math.min(100, Math.round((scansThisMonth / limit) * 100)) : 0;
+  const remaining = Math.max(0, limit - numScans);
+  const percent = limit > 0 ? Math.min(100, Math.round((numScans / limit) * 100)) : 0;
 
   return (
     <div className="flex flex-1 flex-col px-4 py-8">
@@ -135,7 +106,7 @@ export default function UsagePage() {
               <div className="text-right">
                 <p className="text-sm text-muted-foreground">This month</p>
                 <p className="mt-1 text-base font-semibold text-foreground">
-                  {scansThisMonth} / {limit} scans
+                  {numScans} / {limit} scans
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">{remaining} remaining</p>
               </div>
@@ -150,12 +121,12 @@ export default function UsagePage() {
                 <div
                   className={cn(
                     "h-full rounded-full transition-[width] duration-300",
-                    scansThisMonth >= limit ? "bg-destructive" : "bg-primary"
+                    numScans >= limit ? "bg-destructive" : "bg-primary"
                   )}
                   style={{ width: `${percent}%` }}
                 />
               </div>
-              {scansThisMonth >= limit ? (
+              {numScans >= limit ? (
                 <p className="text-sm font-medium text-destructive">
                   You’ve reached your monthly limit.
                 </p>
@@ -167,8 +138,7 @@ export default function UsagePage() {
             </div>
 
             <div className="rounded-lg border border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-              Only scans created between {start.toLocaleDateString()} and {end.toLocaleDateString()} count
-              toward this month’s usage.
+              Scans reset between {start.toLocaleDateString()} and {end.toLocaleDateString()}.
             </div>
           </div>
         )}
