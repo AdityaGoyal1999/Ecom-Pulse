@@ -152,6 +152,44 @@ function isUnsupportedImageFormatError(message: string): boolean {
   );
 }
 
+async function insertScanRow({
+  supabaseAdmin,
+  userId,
+  bucketId,
+  objectPath,
+  status,
+  detectedBooks,
+  recommendations,
+}: {
+  supabaseAdmin: ReturnType<typeof createClient>;
+  userId: string;
+  bucketId: string;
+  objectPath: string;
+  status: string;
+  detectedBooks: Book[];
+  recommendations: Recommendation[];
+}) {
+  const { data: inserted, error: insertError } = await supabaseAdmin
+    .from("scans")
+    .insert({
+      user_id: userId,
+      bucket_id: bucketId,
+      object_path: objectPath,
+      status,
+      detected_books: detectedBooks,
+      recommendations,
+    })
+    .select("id, user_id, bucket_id, object_path, status, created_at")
+    .single();
+
+  if (insertError) {
+    console.error("image-processing insert error", insertError);
+    throw new Error("Failed to create scan entry");
+  }
+
+  return inserted;
+}
+
 async function createImageSignedUrl(
   supabaseAdmin: ReturnType<typeof createClient>,
   bucketId: string,
@@ -340,6 +378,28 @@ Deno.serve(async (req) => {
       signedImageUrl,
     });
 
+    if (detectedBooks.length === 0) {
+      const inserted = await insertScanRow({
+        supabaseAdmin,
+        userId: user.id,
+        bucketId,
+        objectPath,
+        status: "failed",
+        detectedBooks: [],
+        recommendations: [],
+      });
+
+      return jsonResponse(
+        {
+          message:
+            "No books were detected in this image. The scan was saved as failed. " +
+            "This request still counts toward your quota/cost. Please upload images that clearly contain books.",
+          scan: inserted,
+        },
+        201
+      );
+    }
+
     const { favoriteBooks, genres } = await getUserReadingContext(
       supabaseAdmin,
       user.id
@@ -352,23 +412,15 @@ Deno.serve(async (req) => {
       genres,
     });
 
-    const { data: inserted, error: insertError } = await supabaseAdmin
-      .from("scans")
-      .insert({
-        user_id: user.id,
-        bucket_id: bucketId,
-        object_path: objectPath,
-        status: "completed",
-        detected_books: detectedBooks,
-        recommendations,
-      })
-      .select("id, user_id, bucket_id, object_path, status, created_at")
-      .single();
-
-    if (insertError) {
-      console.error("image-processing insert error", insertError);
-      return jsonResponse({ error: "Failed to create scan entry" }, 500);
-    }
+    const inserted = await insertScanRow({
+      supabaseAdmin,
+      userId: user.id,
+      bucketId,
+      objectPath,
+      status: "completed",
+      detectedBooks,
+      recommendations,
+    });
 
     console.log("image-processing created scan:", inserted);
 
