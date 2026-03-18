@@ -48,7 +48,7 @@ export function FreeUsageCard({ used, resetOn }: { used: number; resetOn: Date }
           <p className="text-sm text-muted-foreground">Plan</p>
           <p className="mt-1 text-base font-semibold text-foreground">Free</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            You have <span className="font-semibold text-foreground">{limit}</span> free credits/month.
+            You have <span className="font-semibold text-foreground">{limit}</span> free scans.
           </p>
         </div>
         <div className="text-right">
@@ -68,7 +68,6 @@ export function FreeUsageCard({ used, resetOn }: { used: number; resetOn: Date }
       </div>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-muted-foreground">Credits reset on {formatDate(resetOn)}.</p>
         <Button type="button" disabled className="sm:self-end">
           Upgrade to Premium
         </Button>
