@@ -70,12 +70,14 @@ export default function NewImagePage() {
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [recommendedBooks, setRecommendedBooks] = useState<RecommendedBook[]>([]);
   const [noRecommendations, setNoRecommendations] = useState(false);
+  const [noRecommendationsMessage, setNoRecommendationsMessage] = useState<string | null>(null);
 
   const processFile = useCallback(async (file: File) => {
     setError(null);
     setUploadedUrl(null);
     setRecommendedBooks([]);
     setNoRecommendations(false);
+    setNoRecommendationsMessage(null);
     // Always reset previous selection first so invalid files cannot be uploaded.
     setSelectedFile(null);
     setImageData(null);
@@ -150,6 +152,7 @@ export default function NewImagePage() {
     setUploadedUrl(null);
     setRecommendedBooks([]);
     setNoRecommendations(false);
+    setNoRecommendationsMessage(null);
   }, []);
 
   const uploadToSupabase = useCallback(async () => {
@@ -204,8 +207,12 @@ export default function NewImagePage() {
 
       if (processingError) {
         setError(processingError.message || "Image processing failed.");
+        setUploadedUrl(signed?.signedUrl ?? null);
         return;
       }
+
+      const serverMessage =
+        typeof processingData?.message === "string" ? processingData.message : null;
 
       const recommendations = Array.isArray(processingData?.recommended_books)
         ? processingData.recommended_books
@@ -226,6 +233,12 @@ export default function NewImagePage() {
 
       setRecommendedBooks(recommendations);
       setNoRecommendations(recommendations.length === 0);
+      setNoRecommendationsMessage(
+        recommendations.length === 0
+          ? (serverMessage ??
+              "We could not generate recommendations from this image. Try uploading a clearer shelf photo or one with more visible book titles.")
+          : null
+      );
       setUploadedUrl(signed?.signedUrl ?? null);
     } catch {
       setError("Something went wrong. Please try again.");
@@ -358,8 +371,8 @@ export default function NewImagePage() {
 
         {noRecommendations && !error && (
           <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
-            We could not generate recommendations from this image. Try uploading a clearer shelf photo
-            or one with more visible book titles.
+            {noRecommendationsMessage ??
+              "We could not generate recommendations from this image. Try uploading a clearer shelf photo or one with more visible book titles."}
           </div>
         )}
 
