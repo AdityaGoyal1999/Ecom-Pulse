@@ -26,9 +26,13 @@ function generateNonce(): Promise<[string, string]> {
 interface GoogleOneTapProps {
   /** If set, the official Google sign-in button is rendered into this element (by id). */
   buttonContainerId?: string;
+  /** Called when Google One Tap has initialized and can authenticate. */
+  onReadyChange?: (ready: boolean) => void;
 }
 
-export function GoogleOneTap({ buttonContainerId }: GoogleOneTapProps = {}) {
+export function GoogleOneTap(
+  { buttonContainerId, onReadyChange }: GoogleOneTapProps = {},
+) {
   const supabase = createClient();
   const router = useRouter();
   const initialized = useRef(false);
@@ -38,6 +42,7 @@ export function GoogleOneTap({ buttonContainerId }: GoogleOneTapProps = {}) {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     if (!clientId) {
       console.warn("NEXT_PUBLIC_GOOGLE_CLIENT_ID is not set; Google One Tap skipped.");
+      onReadyChange?.(false);
       return;
     }
 
@@ -50,6 +55,7 @@ export function GoogleOneTap({ buttonContainerId }: GoogleOneTapProps = {}) {
     }
     if (session) {
       router.push("/dashboard");
+      onReadyChange?.(false);
       return;
     }
 
@@ -76,6 +82,8 @@ export function GoogleOneTap({ buttonContainerId }: GoogleOneTapProps = {}) {
       nonce: hashedNonce,
       use_fedcm_for_prompt: true,
     });
+    // Initialized and ready to authenticate.
+    onReadyChange?.(true);
     google.accounts.id.prompt();
     if (buttonContainerId) {
       const el = document.getElementById(buttonContainerId);
@@ -97,6 +105,9 @@ export function GoogleOneTap({ buttonContainerId }: GoogleOneTapProps = {}) {
       src="https://accounts.google.com/gsi/client"
       onLoad={() => {
         initializeGoogleOneTap();
+      }}
+      onError={() => {
+        onReadyChange?.(false);
       }}
     />
   );
