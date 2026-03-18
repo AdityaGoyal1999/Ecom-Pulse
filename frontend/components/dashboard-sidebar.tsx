@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Home, LogOut, ImagePlus, Heart, Sliders, History } from "lucide-react";
+import { LayoutDashboard, Home, LogOut, ImagePlus, Heart, Sliders, History, Gauge } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { cn } from "@/lib/utils";
@@ -129,6 +129,13 @@ export function DashboardSidebar({ children }: { children: React.ReactNode }) {
                     render={<Link href="/dashboard/history"><History />History</Link>}
                     isActive={pathname === "/dashboard/history"}
                     tooltip="History"
+                  />
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    render={<Link href="/dashboard/usage"><Gauge />Usage</Link>}
+                    isActive={pathname === "/dashboard/usage"}
+                    tooltip="Usage"
                   />
                 </SidebarMenuItem>
               </SidebarMenu>
