@@ -1,5 +1,55 @@
 # Book Recommendation System
 
 
-Ever faced the problem where inside a bookstore, you don't know which book might appeal to you?
-Reading through summaries of all the books is cumbersome which is why I have this solution
+## Problem
+In a bookstore (or while browsing online), it can be hard to quickly identify which books will match your tastes. Reading descriptions and manually comparing many titles is slow and often leads to decision fatigue.
+
+## Solution
+This app helps users make faster, more accurate choices by:
+- letting users take a photo of books they see (shelf image / cover image),
+- extracting titles/authors from the image using an OCR+LLM pipeline,
+- generating recommendations tailored to the user’s saved favorites and genre preferences.
+
+It includes a dashboard experience for history and favorites, plus subscription-based usage limits.
+
+## Features
+- Image-based scan -> structured extraction of book titles/authors.
+- Recommendation engine that uses the detected books + user preferences to generate up to 5 recommendations (with guardrails to keep results grounded in what was detected).
+- Favorites management:
+  - fuzzy search over Open Library results
+  - add/remove favorites and save them to your profile
+- Recommendation transparency:
+  - scan history with statuses and stored results.
+- Usage limits tied to subscription plan:
+  - Free tier with a small monthly scan allowance
+  - Premium tier with a larger monthly allowance
+- Stripe subscription billing:
+  - Checkout + webhook handling
+  - automatic plan activation/deactivation
+  - storage of billing period information used by the UI
+- Performance optimizations:
+  - Open Library search is served from a backend edge function
+  - Redis (Upstash) cache-aside for token-level Open Library results
+
+## Tech Stack
+- Frontend: Next.js (React + TypeScript), Tailwind CSS, shadcn/ui components
+- Backend (data + auth): Supabase (Auth, Postgres, Storage, Edge Functions)
+- AI:
+  - OpenAI for OCR/extraction and recommendation logic
+  - Gemini as an optional fallback for OCR
+- Billing: Stripe (Checkout, Customer Portal, Webhooks)
+- Cache: Upstash Redis (HTTP/REST access from edge functions)
+- Search ranking: Fuse.js (fuzzy matching)
+
+## Project Structure
+- `frontend/`
+  - Next.js App Router pages for the dashboard (scan history, favorites, genre preferences, usage)
+  - UI components (sidebar, favorites search, usage cards, etc.)
+  - Calls Supabase Edge Functions for backend operations (favorites search, scan history, settings updates)
+- `supabase/`
+  - `functions/`
+    - `image-processing/`: authenticated image scan pipeline (extract + recommend)
+    - `search-books/`: backend fuzzy search over Open Library (used by favorites search)
+    - `get-previous-scans/`: scan history for the signed-in user
+    - `save-favorites/`: persist favorites in `profiles`
+    - Stripe sync functions (`create-stripe-checkout`, `stripe-webhook`, `create-stripe-portal`)
