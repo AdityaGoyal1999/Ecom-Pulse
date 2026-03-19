@@ -1,18 +1,19 @@
- "use client";
+"use client";
 
- import Image from "next/image";
- import { useState, FormEvent } from "react";
- import { Check, Search, X } from "lucide-react";
- import { Button } from "@/components/ui/button";
- import { Input } from "@/components/ui/input";
- import {
-   Card,
-   CardContent,
-   CardDescription,
-   CardHeader,
-   CardTitle,
- } from "@/components/ui/card";
- import { createClient } from "@/lib/supabase/client";
+import Image from "next/image";
+import { useState, FormEvent } from "react";
+import Fuse from "fuse.js";
+import { Check, Search, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { createClient } from "@/lib/supabase/client";
 
  type OpenLibraryDoc = {
    key: string;
@@ -30,11 +31,36 @@
    coverId?: number;
  };
 
- type OpenLibrarySearchResponse = {
-   docs?: OpenLibraryDoc[];
- };
+type OpenLibrarySearchResponse = {
+  docs?: OpenLibraryDoc[];
+};
 
- export function FavoritesSearchSection() {
+/** Tokens with length ≥2; if none (e.g. single letter), use all non-empty tokens. */
+function tokensForOpenLibrarySearch(trimmed: string): string[] {
+  const raw = trimmed.split(/\s+/).filter(Boolean);
+  const significant = raw.filter((t) => t.length >= 2);
+  return significant.length > 0 ? significant : raw;
+}
+
+async function fetchOpenLibraryDocsForToken(token: string): Promise<OpenLibraryDoc[]> {
+  const url = new URL("https://openlibrary.org/search.json");
+  url.searchParams.set("q", token);
+  url.searchParams.set("limit", "10");
+
+  const response = await fetch(url.toString(), {
+    headers: { Accept: "application/json" },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Open Library search failed: ${response.status}`);
+  }
+
+  const data = (await response.json()) as OpenLibrarySearchResponse;
+  const docs = Array.isArray(data.docs) ? data.docs : [];
+  return docs.filter((d): d is OpenLibraryDoc => typeof d?.key === "string" && d.key.length > 0);
+}
+
+export function FavoritesSearchSection() {
    const [query, setQuery] = useState("");
    const [results, setResults] = useState<OpenLibraryDoc[]>([]);
    const [isLoading, setIsLoading] = useState(false);
@@ -74,43 +100,69 @@
     setSaveStatus(null);
    }
 
-   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-     event.preventDefault();
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
 
-     const trimmed = query.trim();
-     if (!trimmed) {
-       setResults([]);
-       setError(null);
-       return;
-     }
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setResults([]);
+      setError(null);
+      return;
+    }
 
-     try {
-       setIsLoading(true);
-       setError(null);
+    try {
+      setIsLoading(true);
+      setError(null);
 
-       const url = new URL("https://openlibrary.org/search.json");
-       url.searchParams.set("q", trimmed);
-       url.searchParams.set("limit", "5");
+      const tokens = tokensForOpenLibrarySearch(trimmed);
+      const perTokenResults = await Promise.all(
+        tokens.map((token) => fetchOpenLibraryDocsForToken(token))
+      );
 
-       const response = await fetch(url.toString(), {
-         headers: { Accept: "application/json" },
-       });
+      const byKey = new Map<string, OpenLibraryDoc>();
+      for (const docs of perTokenResults) {
+        for (const doc of docs) {
+          if (!byKey.has(doc.key)) {
+            byKey.set(doc.key, doc);
+          }
+        }
+      }
 
-       if (!response.ok) {
-         throw new Error(`Open Library search failed: ${response.status}`);
-       }
+      const candidates = Array.from(byKey.values());
+      if (candidates.length === 0) {
+        setResults([]);
+        return;
+      }
 
-       const data = (await response.json()) as OpenLibrarySearchResponse;
-       const docs = Array.isArray(data.docs) ? data.docs : [];
-       setResults(docs.slice(0, 5));
-     } catch (e) {
-       console.error(e);
-       setError("Could not fetch results. Please try again.");
-       setResults([]);
-     } finally {
-       setIsLoading(false);
-     }
-   }
+      type FuseRow = { key: string; title: string; authorsJoined: string; doc: OpenLibraryDoc };
+      const rows: FuseRow[] = candidates.map((doc) => ({
+        key: doc.key,
+        title: doc.title?.trim() ?? "",
+        authorsJoined: Array.isArray(doc.author_name) ? doc.author_name.join(" ") : "",
+        doc,
+      }));
+
+      const fuse = new Fuse(rows, {
+        keys: [
+          { name: "title", weight: 0.55 },
+          { name: "authorsJoined", weight: 0.45 },
+        ],
+        threshold: 0.42,
+        ignoreLocation: true,
+        includeScore: true,
+      });
+
+      const ranked = fuse.search(trimmed);
+      const topFive = ranked.slice(0, 5).map((r) => r.item.doc);
+      setResults(topFive);
+    } catch (e) {
+      console.error(e);
+      setError("Could not fetch results. Please try again.");
+      setResults([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
    async function saveSelected() {
      if (selected.length === 0 || saving) return;
@@ -277,7 +329,7 @@
                ) : (
                  <div className="rounded-md border border-border/60 bg-background/40 p-3">
                    <p className="text-xs text-muted-foreground">
-                     Search to see the top 5 matches from Open Library.
+                     Search to see the top 5 matches
                    </p>
                  </div>
                )}

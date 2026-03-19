@@ -29,6 +29,7 @@ export default function BillingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isPro, setIsPro] = useState<boolean | null>(null);
+  const [nextBillingDate, setNextBillingDate] = useState<string | null>(null);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
   const [checkoutMessage, setCheckoutMessage] = useState<"success" | "canceled" | null>(null);
@@ -112,7 +113,7 @@ export default function BillingPage() {
 
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
-        .select("is_pro")
+        .select("is_pro, next_billing_date")
         .eq("id", user.id)
         .single();
 
@@ -122,6 +123,9 @@ export default function BillingPage() {
       }
 
       setIsPro(typeof profileData?.is_pro === "boolean" ? profileData.is_pro : false);
+      setNextBillingDate(
+        typeof profileData?.next_billing_date === "string" ? profileData.next_billing_date : null
+      );
     } catch {
       setError("Something went wrong while loading billing.");
     } finally {
@@ -193,16 +197,14 @@ export default function BillingPage() {
                       </div>
                     </div>
                     <div className="rounded-lg border border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-                      <p>
-                        <span className="font-medium text-foreground">Billing period:</span>{" "}
-                        {formatDate(start)} – {formatDate(end)}
-                      </p>
                       <p className="mt-1">
                         <span className="font-medium text-foreground">Cycle:</span> Monthly
                       </p>
                       <p className="mt-1">
                         <span className="font-medium text-foreground">Next renewal:</span>{" "}
-                        {formatDate(end)}
+                        {nextBillingDate
+                          ? formatDate(new Date(nextBillingDate))
+                          : formatDate(end)}
                       </p>
                     </div>
                   </div>

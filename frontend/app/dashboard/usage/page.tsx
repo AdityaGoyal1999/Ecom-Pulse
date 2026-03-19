@@ -19,6 +19,7 @@ export default function UsagePage() {
   const [error, setError] = useState<string | null>(null);
   const [isPro, setIsPro] = useState<boolean | null>(null);
   const [numScans, setNumScans] = useState<number>(0);
+  const [nextBillingDate, setNextBillingDate] = useState<string | null>(null);
 
   const { start, end } = useMemo(() => getMonthWindow(new Date()), []);
 
@@ -38,7 +39,7 @@ export default function UsagePage() {
 
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("is_pro, num_scans")
+          .select("is_pro, num_scans, next_billing_date")
           .eq("id", user.id)
           .single();
 
@@ -49,6 +50,9 @@ export default function UsagePage() {
 
         setIsPro(typeof profileData?.is_pro === "boolean" ? profileData.is_pro : false);
         setNumScans(typeof profileData?.num_scans === "number" ? profileData.num_scans : 0);
+        setNextBillingDate(
+          typeof profileData?.next_billing_date === "string" ? profileData.next_billing_date : null
+        );
       } catch {
         setError("Something went wrong while loading usage.");
       } finally {
@@ -85,7 +89,10 @@ export default function UsagePage() {
 
         {!loading && !error && (
           isPro ? (
-            <ProUsageCard used={numScans} renewsOn={end} />
+            <ProUsageCard
+              used={numScans}
+              renewsOn={nextBillingDate ? new Date(nextBillingDate) : end}
+            />
           ) : (
             <FreeUsageCard used={numScans} resetOn={end} />
           )

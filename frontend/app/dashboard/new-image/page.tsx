@@ -1,12 +1,35 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ImagePlus, ClipboardPaste, X, Upload, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const STORAGE_BUCKET = "book_scans";
+
+function UsageProgressBar({ used, limit }: { used: number; limit: number }) {
+  const remaining = Math.max(0, limit - used);
+  const percent = limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 0;
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <span>{used} / {limit} scans</span>
+        <span>{remaining} remaining</span>
+      </div>
+      <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className={cn(
+            "h-full rounded-full transition-[width] duration-300",
+            used >= limit ? "bg-destructive" : "bg-primary"
+          )}
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+    </div>
+  );
+}
 type RecommendedBook = {
   title: string;
   author: string | null;
@@ -71,6 +94,34 @@ export default function NewImagePage() {
   const [recommendedBooks, setRecommendedBooks] = useState<RecommendedBook[]>([]);
   const [noRecommendations, setNoRecommendations] = useState(false);
   const [noRecommendationsMessage, setNoRecommendationsMessage] = useState<string | null>(null);
+  const [numScans, setNumScans] = useState<number>(0);
+  const [isPro, setIsPro] = useState<boolean>(false);
+
+  const loadUsage = useCallback(async () => {
+    try {
+      const supabase = createClient();
+      const { data: userData } = await supabase.auth.getUser();
+      const user = userData?.user ?? null;
+      if (!user?.id) return;
+
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("is_pro, num_scans")
+        .eq("id", user.id)
+        .single();
+
+      setIsPro(typeof profileData?.is_pro === "boolean" ? profileData.is_pro : false);
+      setNumScans(typeof profileData?.num_scans === "number" ? profileData.num_scans : 0);
+    } catch {
+      // Ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadUsage();
+  }, [loadUsage]);
+
+  const limit = isPro ? 50 : 5;
 
   const processFile = useCallback(async (file: File) => {
     setError(null);
@@ -240,16 +291,17 @@ export default function NewImagePage() {
           : null
       );
       setUploadedUrl(signed?.signedUrl ?? null);
+      void loadUsage();
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setUploading(false);
     }
-  }, [imageData, selectedFile]);
+  }, [imageData, selectedFile, loadUsage]);
 
   return (
     <div className="flex flex-1 flex-col px-4 py-8">
-      <div className="mx-auto w-full max-w-2xl space-y-6">
+      <div className="mx-auto w-full max-w-2xl space-y-6 flex flex-col items-center">
         <div>
           <h1 className="font-sans text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             Upload a photo of a bookstore shelf
@@ -257,6 +309,10 @@ export default function NewImagePage() {
           <p className="mt-2 text-muted-foreground">
             Paste from clipboard (Ctrl+V / Cmd+V), or drag and drop an image here.
           </p>
+        </div>
+
+        <div className="rounded-lg border border-border bg-card px-4 py-3 w-1/2">
+          <UsageProgressBar used={numScans} limit={limit} />
         </div>
 
         <div

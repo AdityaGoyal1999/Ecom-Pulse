@@ -170,7 +170,7 @@ export function DashboardSidebar({ children }: { children: React.ReactNode }) {
               variant="ghost"
               size="icon"
               onClick={handleLogout}
-              className="shrink-0 text-sidebar-foreground bg-red-100 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:hidden"
+              className="shrink-0 text-sidebar-foreground bg-sidebar-accent hover:bg-red-100 hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:hidden"
               aria-label="Log out"
             >
               <LogOut className="size-4" />
