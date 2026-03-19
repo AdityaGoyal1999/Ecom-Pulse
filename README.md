@@ -2,7 +2,7 @@
 
 
 ## Problem
-In a bookstore (or while browsing online), it can be hard to quickly identify which books will match your tastes. Reading descriptions and manually comparing many titles is slow and often leads to decision fatigue.
+In a bookstore (or while browsing online) 📚, it can be hard to quickly identify which books will match your tastes. Reading descriptions and manually comparing many titles is slow and often leads to decision fatigue.
 
 ## Solution
 This app helps users make faster, more accurate choices by:
@@ -23,13 +23,13 @@ It includes a dashboard experience for history and favorites, plus subscription-
 - Usage limits tied to subscription plan:
   - Free tier with a small monthly scan allowance
   - Premium tier with a larger monthly allowance
-- Stripe subscription billing:
+- Stripe subscription billing 💳:
   - Checkout + webhook handling
   - automatic plan activation/deactivation
   - storage of billing period information used by the UI
 - Performance optimizations:
   - Open Library search is served from a backend edge function
-  - Redis (Upstash) cache-aside for token-level Open Library results
+  - Redis (Upstash) cache-aside for token-level Open Library results ⚡
 
 ## Tech Stack
 - Frontend: Next.js (React + TypeScript), Tailwind CSS, shadcn/ui components
