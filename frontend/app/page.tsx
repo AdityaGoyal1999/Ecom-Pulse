@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpenText, PencilLine, Sparkles } from "lucide-react";
+import Image from "next/image";
 
 const steps = [
   {
@@ -55,24 +55,15 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="relative mx-auto flex h-[360px] w-full max-w-[460px] items-center justify-center overflow-hidden rounded-3xl border border-black/10 bg-white/70">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(0,0,0,0.06),transparent_45%),radial-gradient(circle_at_90%_85%,rgba(0,0,0,0.08),transparent_45%)]" />
-            <div className="relative z-10 flex w-full max-w-[360px] flex-col items-center gap-5">
-              <div className="flex items-end gap-3">
-                <BookOpenText className="size-16 text-black" strokeWidth={1.8} />
-                <PencilLine className="size-14 -rotate-12 text-black" strokeWidth={1.8} />
-                <Sparkles className="size-8 text-black/80" strokeWidth={1.8} />
-              </div>
-              <div className="w-full space-y-3">
-                <div className="h-5 rounded-full border border-black/20 bg-black/10" />
-                <div className="h-5 rounded-full border border-black/20 bg-black/10" />
-                <div className="h-5 w-4/5 rounded-full border border-black/20 bg-black/10" />
-              </div>
-              <div className="grid w-full grid-cols-2 gap-3">
-                <div className="h-20 rounded-2xl border border-black/20 bg-[#ff7a1a]" />
-                <div className="h-20 rounded-2xl border border-black/20 bg-white" />
-              </div>
-            </div>
+          <div className="relative mx-auto flex h-[500px] w-full max-w-[500px] items-center justify-center overflow-hidden p-4">
+            <Image
+              src="/hero-image.svg"
+              alt="Reader discovering personalized book recommendations"
+              width={500}
+              height={500}
+              className="h-full w-full object-contain"
+              priority
+            />
           </div>
         </section>
 
