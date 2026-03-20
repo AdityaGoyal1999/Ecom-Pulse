@@ -37,7 +37,6 @@ export function DashboardSidebar({ children }: { children: React.ReactNode }) {
     isPro: boolean | null;
   }>({ createdAt: null, isPro: null });
   const [profilePopupOpen, setProfilePopupOpen] = useState(false);
-  const [onboardingActive, setOnboardingActive] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -75,16 +74,7 @@ export function DashboardSidebar({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    try {
-      setOnboardingActive(localStorage.getItem("book_onboarding_active") === "true");
-    } catch {
-      // Ignore
-    }
-  }, []);
-
-  useEffect(() => {
     const endOnboarding = () => {
-      setOnboardingActive(false);
       try {
         localStorage.setItem("book_onboarding_active", "false");
         localStorage.setItem("book_onboarding_completed", "true");
@@ -101,8 +91,6 @@ export function DashboardSidebar({ children }: { children: React.ReactNode }) {
       } catch {
         // Ignore
       }
-
-      setOnboardingActive(true);
 
       // Defer to ensure the sidebar elements are present.
       setTimeout(() => {
@@ -164,7 +152,6 @@ export function DashboardSidebar({ children }: { children: React.ReactNode }) {
               <SidebarMenu>
                 <SidebarMenuItem
                   id="onboarding-new-image"
-                  className={cn(onboardingActive && "ring-2 ring-primary/60 rounded-md")}
                 >
                   <SidebarMenuButton
                     render={<Link href="/dashboard/new-image"><ImagePlus />New Image</Link>}
@@ -174,7 +161,6 @@ export function DashboardSidebar({ children }: { children: React.ReactNode }) {
                 </SidebarMenuItem>
                 <SidebarMenuItem
                   id="onboarding-favorites"
-                  className={cn(onboardingActive && "ring-2 ring-primary/60 rounded-md")}
                 >
                   <SidebarMenuButton
                     render={<Link href="/dashboard/favorites"><Heart />My favorites</Link>}
@@ -184,7 +170,6 @@ export function DashboardSidebar({ children }: { children: React.ReactNode }) {
                 </SidebarMenuItem>
                 <SidebarMenuItem
                   id="onboarding-genre-preferences"
-                  className={cn(onboardingActive && "ring-2 ring-primary/60 rounded-md")}
                 >
                   <SidebarMenuButton
                     render={<Link href="/dashboard/genre-preferences"><Sliders />Genre preferences</Link>}
