@@ -1,4 +1,4 @@
-name: Linter
+name: Frontend
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  frontend-tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,6 +23,7 @@ jobs:
         run: npm ci
         working-directory: frontend
 
-      - name: Run lint
-        run: npm run lint
+      - name: Run frontend tests
+        run: npm run test
         working-directory: frontend
+
