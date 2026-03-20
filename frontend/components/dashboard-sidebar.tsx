@@ -121,6 +121,27 @@ export function DashboardSidebar({ children }: { children: React.ReactNode }) {
                 description: "Upload a photo of a shelf to generate recommendations.",
               },
             },
+            {
+              element: "#onboarding-history",
+              popover: {
+                title: "History",
+                description: "See your previous scans and recommendations.",
+              },
+            },
+            {
+              element: "#onboarding-usage",
+              popover: {
+                title: "Usage",
+                description: "Track scans used and how many remain this cycle.",
+              },
+            },
+            {
+              element: "#onboarding-billing",
+              popover: {
+                title: "Billing",
+                description: "Manage your subscription and payment details.",
+              },
+            },
           ],
         }).drive();
       }, 0);
@@ -186,21 +207,21 @@ export function DashboardSidebar({ children }: { children: React.ReactNode }) {
               <div className="min-h-0 flex-1" aria-hidden />
 
               <SidebarMenu>
-                <SidebarMenuItem>
+                <SidebarMenuItem id="onboarding-history">
                   <SidebarMenuButton
                     render={<Link href="/dashboard/history"><History />History</Link>}
                     isActive={pathname === "/dashboard/history"}
                     tooltip="History"
                   />
                 </SidebarMenuItem>
-                <SidebarMenuItem>
+                <SidebarMenuItem id="onboarding-usage">
                   <SidebarMenuButton
                     render={<Link href="/dashboard/usage"><Gauge />Usage</Link>}
                     isActive={pathname === "/dashboard/usage"}
                     tooltip="Usage"
                   />
                 </SidebarMenuItem>
-                <SidebarMenuItem>
+                <SidebarMenuItem id="onboarding-billing">
                   <SidebarMenuButton
                     render={<Link href="/dashboard/billing"><CreditCard />Billing</Link>}
                     isActive={pathname === "/dashboard/billing"}
