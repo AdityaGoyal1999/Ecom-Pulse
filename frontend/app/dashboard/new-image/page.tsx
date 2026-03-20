@@ -121,10 +121,6 @@ export default function NewImagePage() {
     void loadUsage();
   }, [loadUsage]);
 
-  const handleStartOnboarding = () => {
-    window.dispatchEvent(new Event("book:onboarding-start"));
-  };
-
   const limit = isPro ? 50 : 5;
 
   const processFile = useCallback(async (file: File) => {
@@ -313,15 +309,6 @@ export default function NewImagePage() {
           <p className="mt-2 text-muted-foreground">
             Paste from clipboard (Ctrl+V / Cmd+V), or drag and drop an image here.
           </p>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="mt-3"
-              onClick={handleStartOnboarding}
-            >
-              Start onboarding
-            </Button>
         </div>
 
         <div className="rounded-lg border border-border bg-card px-4 py-3 w-1/2">
