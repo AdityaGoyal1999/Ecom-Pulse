@@ -455,3 +455,9 @@ enabled = true
 verify_jwt = false
 import_map = "./functions/create-stripe-portal/deno.json"
 entrypoint = "./functions/create-stripe-portal/index.ts"
+
+[functions.get-onboarding-status]
+enabled = true
+verify_jwt = false
+import_map = "./functions/get-onboarding-status/deno.json"
+entrypoint = "./functions/get-onboarding-status/index.ts"
