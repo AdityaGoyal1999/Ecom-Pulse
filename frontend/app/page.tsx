@@ -10,7 +10,7 @@ export default function Home() {
             What to read AI
           </Link>
 
-          <nav className="hidden items-center gap-8 text-sm text-black/75 md:flex">
+          {/* <nav className="hidden items-center gap-8 text-sm text-black/75 md:flex">
             <Link href="#" className="transition-colors hover:text-black">
               Discover
             </Link>
@@ -26,7 +26,7 @@ export default function Home() {
             <Link href="#" className="transition-colors hover:text-black">
               Blog
             </Link>
-          </nav>
+          </nav> */}
 
           <Link
             href="/signup"
