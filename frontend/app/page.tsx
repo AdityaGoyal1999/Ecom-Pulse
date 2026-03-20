@@ -1,6 +1,27 @@
 import Link from "next/link";
 import { BookOpenText, PencilLine, Sparkles } from "lucide-react";
 
+const steps = [
+  {
+    number: "01",
+    title: "Tell us what you like",
+    description:
+      "Share your favorite genres, authors, and reading goals so we can understand your taste.",
+  },
+  {
+    number: "02",
+    title: "Get AI-powered picks",
+    description:
+      "Our engine analyzes your preferences and curates a short list of books tailored just for you.",
+  },
+  {
+    number: "03",
+    title: "Save and start reading",
+    description:
+      "Bookmark the recommendations you love and begin your next read with confidence.",
+  },
+];
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-[#efeeed] text-[#0e0e0f]">
@@ -9,24 +30,6 @@ export default function Home() {
           <Link href="/" className="text-2xl font-semibold tracking-tight">
             What to read AI
           </Link>
-
-          {/* <nav className="hidden items-center gap-8 text-sm text-black/75 md:flex">
-            <Link href="#" className="transition-colors hover:text-black">
-              Discover
-            </Link>
-            <Link href="#" className="transition-colors hover:text-black">
-              Bookstore
-            </Link>
-            <Link href="#" className="transition-colors hover:text-black">
-              Self study
-            </Link>
-            <Link href="#" className="transition-colors hover:text-black">
-              Contacts
-            </Link>
-            <Link href="#" className="transition-colors hover:text-black">
-              Blog
-            </Link>
-          </nav> */}
 
           <Link
             href="/signup"
@@ -73,7 +76,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-14">
+        <section className="py-14 border-b border-black/15 ">
           <div className="rounded-3xl border border-black/10 bg-white/55 px-8 py-12 text-center sm:px-12">
             <h2 className="text-4xl font-semibold tracking-tight">
               Have you ever walked into a bookstore and felt overwhelmed by
@@ -83,6 +86,39 @@ export default function Home() {
               What to read AI cuts through the noise with personalized
               recommendations, so you can quickly find your next favorite read.
             </p>
+          </div>
+        </section>
+
+        <section className="pb-14 py-14">
+          <div className="rounded-3xl px-6 py-10 sm:px-10">
+            <div className="text-center">
+              <h2 className="text-4xl font-semibold tracking-tight">
+                Get personalized recommendations in 3 simple steps
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-black/70">
+                A quick and guided flow that helps you discover books that match
+                your taste.
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-4 md:grid-cols-3">
+              {steps.map((step) => (
+                <article
+                  key={step.number}
+                  className="rounded-2xl border border-black/15 bg-[#efeeed] p-6"
+                >
+                  <p className="text-sm font-semibold tracking-[0.2em] text-black/60">
+                    {step.number}
+                  </p>
+                  <h3 className="mt-3 text-2xl font-semibold leading-tight">
+                    {step.title}
+                  </h3>
+                  <p className="mt-3 text-base leading-relaxed text-black/70">
+                    {step.description}
+                  </p>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
       </main>
