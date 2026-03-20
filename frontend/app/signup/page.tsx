@@ -20,7 +20,6 @@ function AuthForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [googleReady, setGoogleReady] = useState(false);
 
   const handleSubmit = async () => {
     setError(null);
@@ -127,31 +126,13 @@ function AuthForm() {
       </div>
 
       <div className="space-y-2">
-        <GoogleOneTap
-          buttonContainerId="google-signin-button"
-          onReadyChange={setGoogleReady}
+        <GoogleOneTap buttonContainerId="google-signin-button" />
+
+        <div
+          id="google-signin-button"
+          className="min-h-[44px] w-full max-w-[400px]"
+          aria-label={isLogin ? "Log in with Google" : "Continue with Google"}
         />
-
-        <div className="relative w-full max-w-[400px]">
-          {/* Placeholder is always visible; it becomes inert once Google has rendered the real button. */}
-          <Button
-            type="button"
-            disabled={!googleReady}
-            className="h-[44px] w-full rounded-md border border-border bg-background text-foreground hover:bg-muted disabled:opacity-60"
-          >
-            Continue with Google
-          </Button>
-
-          <div
-            id="google-signin-button"
-            className="absolute inset-0 min-h-[44px] w-full"
-            aria-label={isLogin ? "Log in with Google" : "Continue with Google"}
-            style={{
-              opacity: googleReady ? 1 : 0,
-              pointerEvents: googleReady ? "auto" : "none",
-            }}
-          />
-        </div>
       </div>
 
       <button
