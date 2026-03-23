@@ -1,5 +1,11 @@
 # Book Recommendation System 📚
 
+## Live app 🌐
+
+The production frontend is deployed on Vercel:
+
+**[https://book-recommendation-system-taupe.vercel.app](https://book-recommendation-system-taupe.vercel.app)**
+
 ## Problem 🧭
 
 In a bookstore (or while browsing online) 📚, it can be hard to quickly identify which books will match your tastes. Reading descriptions and manually comparing many titles is slow and often leads to decision fatigue.
